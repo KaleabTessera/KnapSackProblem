@@ -37,7 +37,8 @@ def linearKnapSack(v,w,n,W,shouldPrint=False):
        if((sumItemsInKnapsack+w[indexOfLargestElement]) <= W ):
            indexofElementsInKnapsack[indexOfLargestElement] = 1 
            sumItemsInKnapsack += w[indexOfLargestElement]
-           print("Adding (",v[indexOfLargestElement],",",w[indexOfLargestElement], ") to the knapsack")    
+           if(shouldPrint):
+               print("Adding (",v[indexOfLargestElement],",",w[indexOfLargestElement], ") to the knapsack")    
     
 
         
@@ -53,52 +54,76 @@ def linearKnapSack(v,w,n,W,shouldPrint=False):
         
     return indexofElementsInKnapsack
 
-def findSubset(subset,minSizeSubset):
-    allSubsets = []
-    if(len(subset) == minSizeSubset):
-        return subset
-    else :
-        for i in range(minSizeSubset,28):
-            allSubsets.append(findSubset(subset[0:i],minSizeSubset))
-            
-    print(allSubsets)
     
-#def findSubsets(allSubsets,subset,currentIndex):  
-##    np.append(allSubsets.append([]))
-#    if(len(subset) == currentIndex):
-#        return
-#    
-#    for i in range(0,len(allSubsets)):
-#        newSet = np.copy(allSubsets[i])
-#        newSet= np.append(newSet,subset[currentIndex])
-#        allSubsets = np.vstack((allSubsets,newSet))
-##        print(allSubsets)
-#        
-#    findSubsets(allSubsets, subset, currentIndex+1);
-#    
-#    print(allSubsets)
-    
-def findSubsets(allSubsets,subset,currentIndex):      
+def findSubsets(allSubsets,subset,currentIndex,minSizeSubset,k):      
     if(len(subset) == currentIndex):
-        print(allSubsets)
-        return
+        return allSubsets
     
     newSet = []
     for i in range(0,len(allSubsets)):
+      if(len(allSubsets[i]) < k):
         newSet = allSubsets[i].copy()
         newSet.append(subset[currentIndex])
         allSubsets.append(newSet)
+#        print(allSubsets)
         
-    findSubsets(allSubsets, subset, currentIndex+1);
+    findSubsets(allSubsets, subset, currentIndex+1,minSizeSubset,k)
     
     
+    
+#def PTAS(v,w,n,W,minSizeSubset,k):
+#    allSubsets = [[]]
+##    allSubsets.append([])\
+#    indexOfSet = []
+#    for i in range(0,28):
+#        indexOfSet.append(i)
+#        
+#    findSubsets(allSubsets,indexOfSet,0,0,k)
+#    allSubsetsNumpy = np.array(allSubsets)
+#    highestProfit = 0
+#    for sets in allSubsetsNumpy:
+#        if(len(sets) >= minSizeSubset):
+#            chosenV = np.take(v,sets)
+#            chosenW = np.take(w,sets) 
+#            otherV = np.take(v,list(set(indexOfSet) - set(sets)))
+#            otherW = np.take(w,list(set(indexOfSet) - set(sets)))
+#            sumProfitPTAS = np.sum(chosenV)
+#            indexofElementsInKnapsack = linearKnapSack(otherV,otherW,len(sets) ,W-chosenW)
+#            print(chosenV,otherV)
+#            print(sumProfitPTAS,np.sum(v[indexofElementsInKnapsack==1]))
+#            break
     
 def PTAS(v,w,n,W,minSizeSubset,k):
     allSubsets = [[]]
-#    allSubsets.append([])
-    findSubsets(allSubsets,[1,2,3],0)
-    #for i in range(minSizeSubset,k+1):
-     #   print("Todo- ",i)
+#    allSubsets.append([])\
+    indexOfSet = []
+    for i in range(0,28):
+        indexOfSet.append(i)
+        
+    findSubsets(allSubsets,indexOfSet,0,0,k)
+    allSubsetsNumpy = np.array(allSubsets)
+    highestProfit = 0
+    bestSetIndex = []
+    for sets in allSubsetsNumpy:
+        if(len(sets) >= minSizeSubset):
+            chosenV = np.take(v,sets)
+            chosenW = np.take(w,sets) 
+            otherV = np.take(v,list(set(indexOfSet) - set(sets)))
+            otherW = np.take(w,list(set(indexOfSet) - set(sets)))
+            sumProfitPTAS = np.sum(chosenV)
+            sumWeights = np.sum(chosenW)
+            indexofElementsInKnapsack = linearKnapSack(otherV,otherW,len(otherV) ,sumWeights)
+            totalProfit = sumProfitPTAS + np.sum(otherV[indexofElementsInKnapsack==1])
+            print("TOtal Profit: ",totalProfit)
+            
+            if(totalProfit >highestProfit ):
+              highestProfit = totalProfit
+              bestSetIndex = sets
+                                                 
+    print("Money!!!1",highestProfit)
+    print("Set!!1",bestSetIndex)                                            
+                                                 
+            
         
 def main():
     n = 28
