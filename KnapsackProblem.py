@@ -15,11 +15,11 @@ def calculateScore(v,w,n):
     score = np.array([])
     for i in range(n):
         score = np.append(score,round((v[i]/w[i]),3)) 
-    print("Scores: " ,score,"\n")
-    print("Index of elements if they were sorted in descending order:");
+#    print("Scores: " ,score,"\n")
+#    print("Index of elements if they were sorted in descending order:");
     scoreIndexs = np.argsort(-score)
-    print(scoreIndexs)
-    print("***************************")
+# see   print(scoreIndexs)
+#    print("***************************")
     
     return scoreIndexs
 
@@ -42,8 +42,8 @@ def linearKnapSack(v,w,n,W,shouldPrint=False):
     
 
         
-    print("Total value/profit:" , np.sum(v[indexofElementsInKnapsack==1]))
-    print("Total weight:" , np.sum(w[indexofElementsInKnapsack==1]))
+    print("Profit - linear knapsack:" , np.sum(v[indexofElementsInKnapsack==1]))
+    print("Weight - linear knapsack:" , np.sum(w[indexofElementsInKnapsack==1]))
     
     if(shouldPrint):
         print("***************************")
@@ -68,34 +68,16 @@ def findSubsets(allSubsets,subset,currentIndex,minSizeSubset,k):
 #        print(allSubsets)
         
     findSubsets(allSubsets, subset, currentIndex+1,minSizeSubset,k)
-    
-    
-    
-#def PTAS(v,w,n,W,minSizeSubset,k):
-#    allSubsets = [[]]
-##    allSubsets.append([])\
-#    indexOfSet = []
-#    for i in range(0,28):
-#        indexOfSet.append(i)
-#        
-#    findSubsets(allSubsets,indexOfSet,0,0,k)
-#    allSubsetsNumpy = np.array(allSubsets)
-#    highestProfit = 0
-#    for sets in allSubsetsNumpy:
-#        if(len(sets) >= minSizeSubset):
-#            chosenV = np.take(v,sets)
-#            chosenW = np.take(w,sets) 
-#            otherV = np.take(v,list(set(indexOfSet) - set(sets)))
-#            otherW = np.take(w,list(set(indexOfSet) - set(sets)))
-#            sumProfitPTAS = np.sum(chosenV)
-#            indexofElementsInKnapsack = linearKnapSack(otherV,otherW,len(sets) ,W-chosenW)
-#            print(chosenV,otherV)
-#            print(sumProfitPTAS,np.sum(v[indexofElementsInKnapsack==1]))
-#            break
-    
+
+def isLargerThanCapicity(chosenW,W):
+      sumWeights = np.sum(chosenW)
+      if(sumWeights > W):
+          return True
+      else:
+          return False
+
 def PTAS(v,w,n,W,minSizeSubset,k):
     allSubsets = [[]]
-#    allSubsets.append([])\
     indexOfSet = []
     for i in range(0,28):
         indexOfSet.append(i)
@@ -104,24 +86,35 @@ def PTAS(v,w,n,W,minSizeSubset,k):
     allSubsetsNumpy = np.array(allSubsets)
     highestProfit = 0
     bestSetIndex = []
+    bestLinearIndex = []
     for sets in allSubsetsNumpy:
         if(len(sets) >= minSizeSubset):
             chosenV = np.take(v,sets)
-            chosenW = np.take(w,sets) 
-            otherV = np.take(v,list(set(indexOfSet) - set(sets)))
-            otherW = np.take(w,list(set(indexOfSet) - set(sets)))
-            sumProfitPTAS = np.sum(chosenV)
-            sumWeights = np.sum(chosenW)
-            indexofElementsInKnapsack = linearKnapSack(otherV,otherW,len(otherV) ,sumWeights)
-            totalProfit = sumProfitPTAS + np.sum(otherV[indexofElementsInKnapsack==1])
-            print("TOtal Profit: ",totalProfit)
-            
-            if(totalProfit >highestProfit ):
-              highestProfit = totalProfit
-              bestSetIndex = sets
-                                                 
-    print("Money!!!1",highestProfit)
-    print("Set!!1",bestSetIndex)                                            
+            chosenW = np.take(w,sets)
+            if(isLargerThanCapicity(chosenW,W) == False):       
+                otherV = np.take(v,list(set(indexOfSet) - set(sets)))
+                otherW = np.take(w,list(set(indexOfSet) - set(sets)))
+                sumProfitPTAS = np.sum(chosenV)
+                sumWeights = np.sum(chosenW)
+                remainingW = W - sumWeights
+                indexofElementsInKnapsack = linearKnapSack(otherV,otherW,len(otherV) ,remainingW)
+                totalProfit = sumProfitPTAS + np.sum(otherV[indexofElementsInKnapsack==1])
+                print("Weight - PTAS: ",sumWeights)
+                print("Profit - PTAS: ",sumProfitPTAS)
+                print("Total Profit: ",totalProfit)
+                print("***************************")
+                if(totalProfit >highestProfit ):
+                    highestProfit = totalProfit
+                    bestSetIndex = sets
+                    bestLinearIndex = indexofElementsInKnapsack
+    
+    bestLinearIndexValues = np.where(bestLinearIndex==1)
+    print("HighestProfit",highestProfit)
+    print("Best Indexs for PTAS:",bestSetIndex)  
+    print("Selected v - PTAS:",np.take(v,bestSetIndex))  
+    print("Selected v - Linear:",np.take(otherV,bestLinearIndexValues)[0])  
+    print("Selected v - all:",np.concatenate([np.take(v,bestSetIndex),np.take(otherV,bestLinearIndexValues)[0]]))    
+#     np.concatenate([a,b])
                                                  
             
         
