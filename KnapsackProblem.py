@@ -113,23 +113,63 @@ def PTAS(v,w,n,W,minSizeSubset,k):
     print("Best Indexs for PTAS:",bestSetIndex)  
     print("Selected v - PTAS:",np.take(v,bestSetIndex))  
     print("Selected v - Linear:",np.take(otherV,bestLinearIndexValues)[0])  
-    print("Selected v - all:",np.concatenate([np.take(v,bestSetIndex),np.take(otherV,bestLinearIndexValues)[0]]))    
-#     np.concatenate([a,b])
-                                                 
-            
-        
-def main():
+    print("Selected v - all:",np.concatenate([np.take(v,bestSetIndex),np.take(otherV,bestLinearIndexValues)[0]]))                                                                 
+
+def problem1():
+    # =============================================================================
+    #     Problem 1 - Linear Knapsack Problem
+    # =============================================================================
     n = 28
     v = np.array([2,6,8,7,3,4,6,5,10,9,8,11,12,15,6,8,13,14,15,16,13,14,15,26,13,9,25,26])
     w = np.array([7,3,3,5,4,7,5,4,15,10,17,3,6,11,6,14,4,8,9,10,14,17,9,24,11,17,12,14])
     W = 30
     
-#    print("Problem 1 - Greedy Algorithm ",)
-#    linearKnapSack(v,w,n,W)
-    print("\n \n Problem 2 - Polynomial Time Approximation Algorithm (PTAS) ")
-    minSizeSubset = 3
-    k = 10
-    PTAS(v,w,n,W,minSizeSubset,k)
+    # =============================================================================
+    #     Linear Knapsack Problem - Greedy Algorithm
+    # =============================================================================
+    #    print("Problem 1 - Greedy Algorithm ")
+    #    linearKnapSack(v,w,n,W)
+    
+    # =============================================================================
+    #     Linear Knapsack Problem - PTAS
+    # =============================================================================
+    #    print("\n \n Problem 1 - Polynomial Time Approximation Algorithm (PTAS) ")
+    #    minSizeSubset = 3
+    #    k = 10
+    #    PTAS(v,w,n,W,minSizeSubset,k)
+    
+def problem2():
+    # =============================================================================
+    #     Problem 2 Quadratic Knapsack Problem
+    # =============================================================================
+    print("Problem 2 - Quadratic Knapsack Problem ")
+    v = [7, 6, 13,16, 5, 10, 9, 23, 18, 12, 9, 22, 17, 32, 8]
+    w = [13, 14, 14, 15, 15, 9, 26, 24, 13, 11, 9, 12, 25, 12, 26]
+    W = 50
+    p = np.array([
+         7	,12	,7	,6	,13	,8	,11	,7	,15	,23	,14	,15	,17	,9	,15,
+         12	,6	,15	,13	,10	,15	,9	,10	,8	,17	,11	,13	,12	,16	,15,
+         7	,15	,13	,11	,16	,6	,8	,14	,13	,4	,14	,8	,15	,9	,16,
+         6	,13	,11	,16	,10	,13	,14	,14	,17	,15	,14	,6	,24	,13	,4,
+         13	,10	,16	,10	,5	,9	,7	,25	,12	,6	,6	,16	,10	,15	,14,
+         8	,15	,6	,13	,9	,10	,2	,13	,12	,16	,9	,11	,23	,10	,21,
+         11	,9	,8	,14	,7	,2	,9	,8	,18	,4	,13	,14	,14	,17	,15,
+         7	,10	,14	,14	,25	,13	,8	,23	,9	,16	,12	,3	,14	,14	,27,
+         15	,8	,13	,17	,12	,12	,18	,9	,18	,15	,16	,13	,14	,7	,17,
+         23	,17	,4	,15	,6	,16	,4	,16	,15	,12	,28	,5	,19	,6	,18,
+         14	,11	,14	,14	,6	,9	,13	,12	,16	,28	,9	,13	,4	,13	,16,
+         15	,13	,8	,6	,16	,11	,14	,3	,13	,5	,13	,22	,11	,19	,13,
+         17	,12	,15	,24	,10	,23	,14	,14	,14	,19	,4	,11	,17	,15	,12,
+         9	,16	,9	,13	,15	,10	,17	,14	,7	,6	,13	,19	,15	,32	,16,
+         15	,15	,16	,4	,14	,21	,15	,27	,17	,18	,16	,13	,12	,16	,8
+         ])
+    print(p.reshape(15,15))
+
+def main():
+    problem2() 
+   
+    
+   
 
 if __name__ == '__main__':
     main()
