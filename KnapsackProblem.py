@@ -137,6 +137,28 @@ def problem1():
     #    minSizeSubset = 3
     #    k = 10
     #    PTAS(v,w,n,W,minSizeSubset,k)
+
+import random
+ 
+#def sampleKItems(k)  
+def getAllPairsForSample(sampleArrayIndexs):
+    allSubsets = [[]]
+    subsetOfPairs = []
+    subsetSize= 2
+    findSubsets(allSubsets,sampleArrayIndexs,0,0,2)
+    for sets in allSubsets:
+        if(len(sets) == subsetSize):
+            subsetOfPairs.append(sets)
+            
+    print("Pairs: ",subsetOfPairs)
+    
+def generateRandomNumbers(numRandomNumbers,maxRandomNumber ):
+    random.seed(42)
+    listRandomIndexs = []
+    while len(listRandomIndexs) < numRandomNumbers:
+        randomI = random.randint(0,maxRandomNumber-1)
+        if randomI not in listRandomIndexs: listRandomIndexs.append(randomI)        
+    return listRandomIndexs
     
 def problem2():
     # =============================================================================
@@ -163,7 +185,12 @@ def problem2():
          9	,16	,9	,13	,15	,10	,17	,14	,7	,6	,13	,19	,15	,32	,16,
          15	,15	,16	,4	,14	,21	,15	,27	,17	,18	,16	,13	,12	,16	,8
          ])
-    print(p.reshape(15,15))
+#    print(p.reshape(15,15))
+    k = 7
+    size = 15
+    randomNumberIndex = generateRandomNumbers(k,size)
+    print("Indexs for sampled items:" ,randomNumberIndex)
+    getAllPairsForSample(randomNumberIndex)
 
 def main():
     problem2() 
