@@ -13,6 +13,9 @@ def printArray(v,w,n):
 
 def calculateScore(v,w,n):
     score = np.array([])
+# =============================================================================
+#     Check rounding
+# =============================================================================
     for i in range(n):
         score = np.append(score,round((v[i]/w[i]),3)) 
 #    print("Scores: " ,score,"\n")
@@ -55,7 +58,7 @@ def linearKnapSack(v,w,n,W,shouldPrint=False):
     return indexofElementsInKnapsack
 
     
-def findSubsets(allSubsets,subset,currentIndex,minSizeSubset,k):      
+def findSubsets(allSubsets,subset,currentIndex,k):      
     if(len(subset) == currentIndex):
         return allSubsets
     
@@ -67,7 +70,7 @@ def findSubsets(allSubsets,subset,currentIndex,minSizeSubset,k):
         allSubsets.append(newSet)
 #        print(allSubsets)
         
-    findSubsets(allSubsets, subset, currentIndex+1,minSizeSubset,k)
+    findSubsets(allSubsets, subset, currentIndex+1,k)
 
 def isLargerThanCapicity(chosenW,W):
       sumWeights = np.sum(chosenW)
@@ -82,7 +85,7 @@ def PTAS(v,w,n,W,minSizeSubset,k):
     for i in range(0,28):
         indexOfSet.append(i)
         
-    findSubsets(allSubsets,indexOfSet,0,0,k)
+    findSubsets(allSubsets,indexOfSet,0,k)
     allSubsetsNumpy = np.array(allSubsets)
     highestProfit = 0
     bestSetIndex = []
@@ -139,18 +142,15 @@ def problem1():
     #    PTAS(v,w,n,W,minSizeSubset,k)
 
 import random
- 
-#def sampleKItems(k)  
-def getAllPairsForSample(sampleArrayIndexs):
+def finaAllSubsets(array, subsetSize):
     allSubsets = [[]]
-    subsetOfPairs = []
-    subsetSize= 2
-    findSubsets(allSubsets,sampleArrayIndexs,0,0,2)
+    findSubsets(allSubsets,array,0,2)
+    returnSet = []
     for sets in allSubsets:
         if(len(sets) == subsetSize):
-            subsetOfPairs.append(sets)
+            returnSet.append(sets)      
+    return returnSet
             
-    print("Pairs: ",subsetOfPairs)
     
 def generateRandomNumbers(numRandomNumbers,maxRandomNumber ):
     random.seed(42)
@@ -159,14 +159,73 @@ def generateRandomNumbers(numRandomNumbers,maxRandomNumber ):
         randomI = random.randint(0,maxRandomNumber-1)
         if randomI not in listRandomIndexs: listRandomIndexs.append(randomI)        
     return listRandomIndexs
+
+def sortByEfficiencyFunction(arrayOfPairs,p,w):
+    allEfficiencies = np.array([])
+    for pair in arrayOfPairs:
+        P_ij = p[pair[0]][pair[1]]
+        w_i = w[pair[0]]
+        w_j = w[pair[1]]
+        efficiency = P_ij/(w_i+w_j)
+        allEfficiencies = np.append(allEfficiencies,efficiency)
+        
+    efficiencyIndex = np.argsort(-allEfficiencies)
+    return efficiencyIndex
+
+def isAnElementFromPairAlreadySelected(pairToAdd,pairsAlreadyChosen):
+    indexFirstElementInPair = pairToAdd[0]
+    indexSecondElementInPair = pairToAdd[1]
+    
+    if (indexFirstElementInPair in pairsAlreadyChosen or indexSecondElementInPair in pairsAlreadyChosen):
+        return True
+    else:
+        return False
+    
+def allElementsToKnapSack(arrayOfPairs,efficiencyIndexs,v,w,W,p):
+    k = len(efficiencyIndexs)
+    sumWeightElementsKnapsack = 0
+    indexChosenElements = []
+    sumProfit = 0
+    indexOfSet = []
+    for i in range(0,15):
+        indexOfSet.append(i)
+        
+    for i in range(k):
+        currentLargestPair = arrayOfPairs[efficiencyIndexs[i]]
+        indexFirstElementInPair = currentLargestPair[0]
+        indexSecondElementInPair = currentLargestPair[1]
+        w_i = w[indexFirstElementInPair]
+        w_j = w[indexSecondElementInPair]
+        if((sumWeightElementsKnapsack+w_i+w_j) <= W):
+            if(isAnElementFromPairAlreadySelected(currentLargestPair,indexChosenElements) == False):
+                indexChosenElements.append(indexFirstElementInPair)
+                indexChosenElements.append(indexSecondElementInPair)
+                otherV = np.take(v,list(set(indexOfSet) - set(currentLargestPair)))
+                otherW = np.take(w,list(set(indexOfSet) - set(currentLargestPair)))
+                sumWeightElementsKnapsack += (w_i+w_j)
+                sumProfit += (v[indexFirstElementInPair] + v[indexSecondElementInPair])
+                print("Adding (",currentLargestPair,",",w_i,w_j, ") to the knapsack")   
+    
+    remainingW = W - sumWeightElementsKnapsack
+    
+    print("Weight - PAIRS: ",sumWeightElementsKnapsack)
+    print("Profit - PAIRS: ",sumProfit)
+#    print("Total Profit: ",totalProfit)
+    
+    indexofElementsInKnapsack = linearKnapSack(otherV,otherW,len(otherV) ,remainingW)
+    print("Selected v - PAIRS:",np.take(v,indexChosenElements))  
+#    print("Selected v - Linear:",np.take(otherV,indexofElementsInKnapsack)[0])  
+#    print("Selected v - all:",np.concatenate([np.take(v,indexChosenElements),np.take(otherV,indexofElementsInKnapsack)[0]]))                    
+
+    
     
 def problem2():
     # =============================================================================
     #     Problem 2 Quadratic Knapsack Problem
     # =============================================================================
     print("Problem 2 - Quadratic Knapsack Problem ")
-    v = [7, 6, 13,16, 5, 10, 9, 23, 18, 12, 9, 22, 17, 32, 8]
-    w = [13, 14, 14, 15, 15, 9, 26, 24, 13, 11, 9, 12, 25, 12, 26]
+    v = np.array([7, 6, 13,16, 5, 10, 9, 23, 18, 12, 9, 22, 17, 32, 8])
+    w = np.array([13, 14, 14, 15, 15, 9, 26, 24, 13, 11, 9, 12, 25, 12, 26])
     W = 50
     p = np.array([
          7	,12	,7	,6	,13	,8	,11	,7	,15	,23	,14	,15	,17	,9	,15,
@@ -185,13 +244,16 @@ def problem2():
          9	,16	,9	,13	,15	,10	,17	,14	,7	,6	,13	,19	,15	,32	,16,
          15	,15	,16	,4	,14	,21	,15	,27	,17	,18	,16	,13	,12	,16	,8
          ])
-#    print(p.reshape(15,15))
+    p = p.reshape(15,15)
     k = 7
     size = 15
     randomNumberIndex = generateRandomNumbers(k,size)
     print("Indexs for sampled items:" ,randomNumberIndex)
-    getAllPairsForSample(randomNumberIndex)
-
+    arrayOfPairs = finaAllSubsets(randomNumberIndex,2)
+    print("Pairs: ",arrayOfPairs)
+    efficiencyIndexs = sortByEfficiencyFunction(arrayOfPairs,p,w)
+    allElementsToKnapSack(arrayOfPairs,efficiencyIndexs,v,w,W,p)
+    
 def main():
     problem2() 
    
