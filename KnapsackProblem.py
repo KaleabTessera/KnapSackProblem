@@ -1,39 +1,18 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-def printArray(v,w,n):
-  print("******Possible Items*******")
-  print("{",end="")
-  for i in range(n):
-      if(i == n-1):
-          print("(",v[i],",",w[i],")",end="")        
-      else:
-          print("(",v[i],",",w[i],"),",end="")
-  print("}") 
-  print("***************************")
-
 def calculateScore(v,w,n):
     score = np.array([])
-# =============================================================================
-#     Check rounding
-# =============================================================================
     for i in range(n):
         score = np.append(score,round((v[i]/w[i]),3)) 
-#    print("Scores: " ,score,"\n")
-#    print("Index of elements if they were sorted in descending order:");
     scoreIndexs = np.argsort(-score)
-# see   print(scoreIndexs)
-#    print("***************************")
     
     return scoreIndexs
 
 def linearKnapSack(v,w,n,W,shouldPrint=False):
     sumItemsInKnapsack = 0
-    
-    if(shouldPrint):
-        printArray(v,w,n)
         
     scoreIndexs =  calculateScore(v,w,n)
-    indexofElementsInKnapsack = np.zeros(n)
+    indexofElementsInKnapsack = np.zeros(n).astype(int)
     
     for i in range(n):
        indexOfLargestElement = scoreIndexs[i]
@@ -42,11 +21,6 @@ def linearKnapSack(v,w,n,W,shouldPrint=False):
            sumItemsInKnapsack += w[indexOfLargestElement]
            if(shouldPrint):
                print("Adding (",v[indexOfLargestElement],",",w[indexOfLargestElement], ") to the knapsack")    
-    
-
-        
-    print("Profit - linear knapsack:" , np.sum(v[indexofElementsInKnapsack==1]))
-    print("Weight - linear knapsack:" , np.sum(w[indexofElementsInKnapsack==1]))
     
     if(shouldPrint):
         print("***************************")
@@ -68,7 +42,6 @@ def findSubsets(allSubsets,subset,currentIndex,k):
         newSet = allSubsets[i].copy()
         newSet.append(subset[currentIndex])
         allSubsets.append(newSet)
-#        print(allSubsets)
         
     findSubsets(allSubsets, subset, currentIndex+1,k)
 
@@ -78,45 +51,59 @@ def isLargerThanCapicity(chosenW,W):
           return True
       else:
           return False
+        
+def finaAllSubsets(array, subsetSize,k):
+    allSubsets = [[]]
+    findSubsets(allSubsets,array,0,k)
+    returnSet = []
+    for sets in allSubsets:
+        if(len(sets) == subsetSize):
+            returnSet.append(sets)      
+    return returnSet
 
-def PTAS(v,w,n,W,minSizeSubset,k):
+def PTAS(v,w,n,W,minSizeSubset,k,shouldPrint=False):
     allSubsets = [[]]
     indexOfSet = []
     for i in range(0,28):
         indexOfSet.append(i)
         
-    findSubsets(allSubsets,indexOfSet,0,k)
+    allSubsets = finaAllSubsets(indexOfSet,minSizeSubset,k)
     allSubsetsNumpy = np.array(allSubsets)
     highestProfit = 0
     bestSetIndex = []
     bestLinearIndex = []
     for sets in allSubsetsNumpy:
-        if(len(sets) >= minSizeSubset):
-            chosenV = np.take(v,sets)
-            chosenW = np.take(w,sets)
-            if(isLargerThanCapicity(chosenW,W) == False):       
-                otherV = np.take(v,list(set(indexOfSet) - set(sets)))
-                otherW = np.take(w,list(set(indexOfSet) - set(sets)))
-                sumProfitPTAS = np.sum(chosenV)
-                sumWeights = np.sum(chosenW)
-                remainingW = W - sumWeights
-                indexofElementsInKnapsack = linearKnapSack(otherV,otherW,len(otherV) ,remainingW)
-                totalProfit = sumProfitPTAS + np.sum(otherV[indexofElementsInKnapsack==1])
+        chosenV = np.take(v,sets)
+        chosenW = np.take(w,sets)  
+        if(isLargerThanCapicity(chosenW,W) == False):
+            otherV = np.take(v,list(set(indexOfSet) - set(sets)))
+            otherW = np.take(w,list(set(indexOfSet) - set(sets)))
+            sumProfitPTAS = np.sum(chosenV)
+            sumWeights = np.sum(chosenW)
+            remainingW = W - sumWeights
+            indexofElementsInKnapsack = linearKnapSack(otherV,otherW,len(otherV) ,remainingW)
+            totalProfit = sumProfitPTAS + np.sum(otherV[indexofElementsInKnapsack==1])
+            if(shouldPrint):
                 print("Weight - PTAS: ",sumWeights)
                 print("Profit - PTAS: ",sumProfitPTAS)
                 print("Total Profit: ",totalProfit)
                 print("***************************")
-                if(totalProfit >highestProfit ):
-                    highestProfit = totalProfit
-                    bestSetIndex = sets
-                    bestLinearIndex = indexofElementsInKnapsack
+                
+            if(totalProfit >highestProfit ):
+                highestProfit = totalProfit
+                bestSetIndex = sets
+                bestLinearIndex = indexofElementsInKnapsack
+                bestOtherV = otherV
+                bestOtherW = otherW
     
     bestLinearIndexValues = np.where(bestLinearIndex==1)
-    print("HighestProfit",highestProfit)
     print("Best Indexs for PTAS:",bestSetIndex)  
     print("Selected v - PTAS:",np.take(v,bestSetIndex))  
-    print("Selected v - Linear:",np.take(otherV,bestLinearIndexValues)[0])  
-    print("Selected v - all:",np.concatenate([np.take(v,bestSetIndex),np.take(otherV,bestLinearIndexValues)[0]]))                                                                 
+    print("Selected v - Linear:",np.take(bestOtherV,bestLinearIndexValues)[0])  
+    print("Selected v - all:",np.concatenate([np.take(v,bestSetIndex),np.take(bestOtherV,bestLinearIndexValues)[0]]))
+    print("Selected w - all",np.concatenate([np.take(w,bestSetIndex),np.take(bestOtherW,bestLinearIndexValues)[0]]))
+    print("Total Weight - all",np.sum(np.concatenate([np.take(w,bestSetIndex),np.take(bestOtherW,bestLinearIndexValues)[0]])))
+    print("Best Profit - all",highestProfit)                                                          
 
 def problem1():
     # =============================================================================
@@ -130,30 +117,23 @@ def problem1():
     # =============================================================================
     #     Linear Knapsack Problem - Greedy Algorithm
     # =============================================================================
-    #    print("Problem 1 - Greedy Algorithm ")
-    #    linearKnapSack(v,w,n,W)
+    print("Problem 1 - Greedy Algorithm ")
+    indexofElementsInKnapsack = linearKnapSack(v,w,n,W)
+    print("Selected w:",w[indexofElementsInKnapsack==1])  
+    print("Selected v:",v[indexofElementsInKnapsack==1])  
     
     # =============================================================================
     #     Linear Knapsack Problem - PTAS
     # =============================================================================
-    #    print("\n \n Problem 1 - Polynomial Time Approximation Algorithm (PTAS) ")
-    #    minSizeSubset = 3
-    #    k = 10
-    #    PTAS(v,w,n,W,minSizeSubset,k)
+    print("\n \n Problem 1 - Polynomial Time Approximation Algorithm (PTAS) ")
+    minSizeSubset = 3
+    k = 10
+    PTAS(v,w,n,W,minSizeSubset,k)
 
 import random
-def finaAllSubsets(array, subsetSize):
-    allSubsets = [[]]
-    findSubsets(allSubsets,array,0,2)
-    returnSet = []
-    for sets in allSubsets:
-        if(len(sets) == subsetSize):
-            returnSet.append(sets)      
-    return returnSet
             
-    
-def generateRandomNumbers(numRandomNumbers,maxRandomNumber ):
-    random.seed(42)
+def generateRandomNumbers(numRandomNumbers,maxRandomNumber,randomSeed ):
+    random.seed(randomSeed)
     listRandomIndexs = []
     while len(listRandomIndexs) < numRandomNumbers:
         randomI = random.randint(0,maxRandomNumber-1)
@@ -210,13 +190,21 @@ def allElementsToKnapSack(arrayOfPairs,efficiencyIndexs,v,w,W,p):
     
     print("Weight - PAIRS: ",sumWeightElementsKnapsack)
     print("Profit - PAIRS: ",sumProfit)
-#    print("Total Profit: ",totalProfit)
     
     indexofElementsInKnapsack = linearKnapSack(otherV,otherW,len(otherV) ,remainingW)
+    print("Weight - linear knapsack:" , np.sum(otherW[indexofElementsInKnapsack==1]))
+    print("Profit - linear knapsack:" , np.sum(otherV[indexofElementsInKnapsack==1]))
+    
     print("Selected v - PAIRS:",np.take(v,indexChosenElements))  
-#    print("Selected v - Linear:",np.take(otherV,indexofElementsInKnapsack)[0])  
-#    print("Selected v - all:",np.concatenate([np.take(v,indexChosenElements),np.take(otherV,indexofElementsInKnapsack)[0]]))                    
-
+    print("Selected v - Linear:",otherV[indexofElementsInKnapsack==1])  
+    print("Selected w - PAIRS:",np.take(w,indexChosenElements))  
+    print("Selected w - Linear:",otherW[indexofElementsInKnapsack==1]) 
+    
+    print("Selected v - all:",np.concatenate([np.take(v,indexChosenElements),otherV[indexofElementsInKnapsack==1]]))     
+    
+    print("Selected w - all: ",np.concatenate([np.take(w,indexChosenElements),otherW[indexofElementsInKnapsack ==1]]))
+    print("Total Weight - all: ",np.sum(np.concatenate([np.take(w,indexChosenElements),otherW[indexofElementsInKnapsack ==1]])))
+    print("Total Profit - all:",np.sum(np.concatenate([np.take(v,indexChosenElements),otherV[indexofElementsInKnapsack==1]])))
     
     
 def problem2():
@@ -247,14 +235,17 @@ def problem2():
     p = p.reshape(15,15)
     k = 7
     size = 15
-    randomNumberIndex = generateRandomNumbers(k,size)
+    randomSeed = 100
+
+    randomNumberIndex = generateRandomNumbers(k,size,randomSeed)
     print("Indexs for sampled items:" ,randomNumberIndex)
-    arrayOfPairs = finaAllSubsets(randomNumberIndex,2)
+    arrayOfPairs = finaAllSubsets(randomNumberIndex,2,k)
     print("Pairs: ",arrayOfPairs)
     efficiencyIndexs = sortByEfficiencyFunction(arrayOfPairs,p,w)
     allElementsToKnapSack(arrayOfPairs,efficiencyIndexs,v,w,W,p)
     
 def main():
+#    problem1()
     problem2() 
    
     
