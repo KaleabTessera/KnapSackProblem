@@ -211,7 +211,7 @@ def problem2():
     # =============================================================================
     #     Problem 2 Quadratic Knapsack Problem
     # =============================================================================
-    print("Problem 2 - Quadratic Knapsack Problem ")
+    print("\n \n Problem 2 - Quadratic Knapsack Problem ")
     v = np.array([7, 6, 13,16, 5, 10, 9, 23, 18, 12, 9, 22, 17, 32, 8])
     w = np.array([13, 14, 14, 15, 15, 9, 26, 24, 13, 11, 9, 12, 25, 12, 26])
     W = 50
@@ -234,7 +234,7 @@ def problem2():
          ])
     p = p.reshape(15,15)
     k = 7
-    size = 15
+    size = 11
     randomSeed = 100
 
     randomNumberIndex = generateRandomNumbers(k,size,randomSeed)
@@ -242,10 +242,11 @@ def problem2():
     arrayOfPairs = finaAllSubsets(randomNumberIndex,2,k)
     print("Pairs: ",arrayOfPairs)
     efficiencyIndexs = sortByEfficiencyFunction(arrayOfPairs,p,w)
-    allElementsToKnapSack(arrayOfPairs,efficiencyIndexs,v,w,W,p)
+    scoreIndex = np.argsort(efficiencyIndexs)
+    allElementsToKnapSack(arrayOfPairs,scoreIndex,v,w,W,p)
     
 def main():
-#    problem1()
+    problem1()
     problem2() 
    
     
